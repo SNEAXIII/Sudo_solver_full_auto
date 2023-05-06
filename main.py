@@ -2,7 +2,8 @@ from time import time, sleep
 from pyautogui import locateOnScreen, screenshot, locate
 from PIL import ImageGrab, Image
 import os
-
+import mouse
+import keyboard
 debut = time()
 
 
@@ -14,7 +15,6 @@ def is_empty(region):
     for index in range(7, 20):
         set_couleur.add(region.getpixel((25, index)))
     return len(set_couleur) == 1
-
 
 screen = ImageGrab.grab((386, 242, 879, 735))
 
@@ -36,6 +36,6 @@ for y in range(9):
         sudo_liste[y].append(a_ajouter)
 
 for ligne in sudo_liste:
-    print(len(ligne), ligne)
+    print(ligne)
 
 print(f"{time() - debut} s")
