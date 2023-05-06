@@ -2,8 +2,9 @@ class cell autorise restant
 class 3*3 autorise restant
 class 9*9
 si 1 qui reste --> auto fill
-autofill rows + colums
-verif si reste une possibilité
+autofill rows + colums + 3*3 qd nombre ajoutés
+verif si reste une possibilité case 3*3
+verif alone possible in line
 
 8 8 (826, 682, 55, 55)
 9 ['7', ' ', ' ', ' ', ' ', '3', ' ', ' ', '1']
