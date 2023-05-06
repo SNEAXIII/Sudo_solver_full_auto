@@ -1,9 +1,11 @@
 from time import time,sleep
 from pyautogui import locateOnScreen,screenshot
+from PIL import ImageGrab, Image
 import os
 debut = time()
+def screenshot(): ImageGrab.grab((386, 242, 879, 735)).save("capture.png")
 
-# screen = (386, 242, 879, 735)
+screenshot()
 
 x_base = 386
 y_base = 242
