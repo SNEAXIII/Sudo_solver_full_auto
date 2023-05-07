@@ -1,21 +1,24 @@
 from typing import Optional
 from time import time, sleep
-from pyautogui import locateOnScreen, screenshot, locate
+from pyautogui import locate
 from PIL import ImageGrab, Image
 import os
 import mouse
 import keyboard
 
+debut = time()
+
 
 class Sudoku:
 
-    def __init__(self,png:bool = False):
+    def __init__(self, png: Optional[str] = None):
+        self.numbers_dicto = {f"{nb}": 0 for nb in range(1, 10)}
         self.boxs = [Box(i) for i in range(9)]
         self.columns = [Column(x) for x in range(9)]
         self.rows = [Row(y) for y in range(9)]
         self.longueur_case = 55
         self.numbers = os.listdir(f"{os.path.dirname(os.path.abspath(__file__))}\\nombres")[::-1]
-        self.screen = Image.open("BUG.png") if png else ImageGrab.grab((386, 242, 879, 735))
+        self.screen = Image.open(png) if png is not None else ImageGrab.grab((386, 242, 879, 735))
         self.build()
         self.all_blacklist()
 
@@ -26,7 +29,7 @@ class Sudoku:
             for field in row.list:
                 str += f"{field if field.value is not None else ' '}, "
             str = str[:-2] + "]\n"
-        return str
+        return str[:-1]
 
     def show(self, id: int, type: str):
         if type == "box":
@@ -39,6 +42,10 @@ class Sudoku:
             for index, item in enumerate(self.columns[id].list):
                 print(index, item)
 
+    def show_numbers(self):
+        for index, elem in self.numbers_dicto.items():
+            print(f"Il y a {elem} fois le chiffre {index}")
+
     def build(self):
         for y in range(9):
             for x in range(9):
@@ -46,13 +53,11 @@ class Sudoku:
                 a_ajouter = None
                 if not self.is_empty_region(region):
                     for nb in self.numbers:
-                        est_present = locate(f"nombres/{nb}", region, confidence=0.80, grayscale=True)
+                        est_present = locate(f"nombres/{nb}", region, confidence=0.85, grayscale=True)
                         if nb in self.numbers and est_present is not None:
                             a_ajouter = int(nb[0])
                             break
-                if  (x // 3) + (y // 3 * 3):
-                    region.show()
-                self.add_field_all(x, y, (x // 3) + (y // 3 * 3), a_ajouter)
+                self.add_field_all(x, y, x // 3 + y // 3 * 3, a_ajouter)
 
     def all_blacklist(self):
         for row in self.rows:
@@ -86,6 +91,8 @@ class Sudoku:
         return self.screen.crop((left, top, left + self.longueur_case, top + self.longueur_case))
 
     def add_field_all(self, x: int, y: int, i: int, value: int):
+        if isinstance(value, int):
+            self.numbers_dicto[str(value)] += 1
         field = Field(x, y, i, value)
         self.add_field_box(field)
         self.add_field_column(field)
@@ -94,13 +101,10 @@ class Sudoku:
     def add_field_box(self, field):
         selected_box = self.boxs[field.i]
         selected_box.dico.add(field)
-        if field.i == 4:
-            print(selected_box.i,field,field.pos())
         if field.value is not None:
             if field.value in selected_box.white_list:
                 selected_box.white_list.discard(field.value)
             else:
-                test = 0
                 raise ValueError(f"The field {field} already exist the box n°{selected_box.i}")
 
     def add_field_column(self, field):
@@ -177,10 +181,14 @@ class Field:
         return f"{self.value if self.value is not None else self.white_list}"
 
     def pos(self):
-        return self.x,self.y,self.i
+        return self.x, self.y, self.i
 
 
 sudo = Sudoku()
+
+print(sudo.numbers_dicto)
+sudo.show_numbers()
 print(sudo)
-a = 0
-a = 0
+
+
+print(f"{time() - debut} s")
