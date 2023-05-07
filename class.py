@@ -9,13 +9,13 @@ import keyboard
 
 class Sudoku:
 
-    def __init__(self):
+    def __init__(self,png:bool = False):
         self.boxs = [Box(i) for i in range(9)]
         self.columns = [Column(x) for x in range(9)]
         self.rows = [Row(y) for y in range(9)]
         self.longueur_case = 55
         self.numbers = os.listdir(f"{os.path.dirname(os.path.abspath(__file__))}\\nombres")[::-1]
-        self.screen = ImageGrab.grab((386, 242, 879, 735))
+        self.screen = Image.open("BUG.png") if png else ImageGrab.grab((386, 242, 879, 735))
         self.build()
         self.all_blacklist()
 
@@ -28,6 +28,17 @@ class Sudoku:
             str = str[:-2] + "]\n"
         return str
 
+    def show(self, id: int, type: str):
+        if type == "box":
+            for index, item in enumerate(self.boxs[id].dico):
+                print(index, item)
+        if type == "row":
+            for index, item in enumerate(self.rows[id].list):
+                print(index, item)
+        if type == "column":
+            for index, item in enumerate(self.columns[id].list):
+                print(index, item)
+
     def build(self):
         for y in range(9):
             for x in range(9):
@@ -39,6 +50,8 @@ class Sudoku:
                         if nb in self.numbers and est_present is not None:
                             a_ajouter = int(nb[0])
                             break
+                if  (x // 3) + (y // 3 * 3):
+                    region.show()
                 self.add_field_all(x, y, (x // 3) + (y // 3 * 3), a_ajouter)
 
     def all_blacklist(self):
@@ -81,6 +94,8 @@ class Sudoku:
     def add_field_box(self, field):
         selected_box = self.boxs[field.i]
         selected_box.dico.add(field)
+        if field.i == 4:
+            print(selected_box.i,field,field.pos())
         if field.value is not None:
             if field.value in selected_box.white_list:
                 selected_box.white_list.discard(field.value)
@@ -161,8 +176,11 @@ class Field:
     def __str__(self):
         return f"{self.value if self.value is not None else self.white_list}"
 
+    def pos(self):
+        return self.x,self.y,self.i
+
 
 sudo = Sudoku()
-
+print(sudo)
 a = 0
 a = 0
