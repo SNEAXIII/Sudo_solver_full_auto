@@ -1,5 +1,5 @@
 pause
 :debut
-py main.py
+py class.py
 pause
-goto debut
+    goto debut

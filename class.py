@@ -12,6 +12,7 @@ debut = time()
 class Sudoku:
 
     def __init__(self, png: Optional[str] = None):
+        self.blacklist_pixel = ((195, 220, 250), (199, 214, 233), (228, 234, 243))
         self.numbers_dicto = {f"{nb}": 0 for nb in range(1, 10)}
         self.boxs = [Box(i) for i in range(9)]
         self.columns = [Column(x) for x in range(9)]
@@ -21,6 +22,7 @@ class Sudoku:
         self.screen = Image.open(png) if png is not None else ImageGrab.grab((386, 242, 879, 735))
         self.build()
         self.all_blacklist()
+        a = 0
 
     def __str__(self):
         str = ""
@@ -52,12 +54,24 @@ class Sudoku:
                 region = self.select_region(x, y)
                 a_ajouter = None
                 if not self.is_empty_region(region):
+                    region = self.remove_background(region.convert('RGBA'))
                     for nb in self.numbers:
-                        est_present = locate(f"nombres/{nb}", region, confidence=0.85, grayscale=True)
+                        est_present = locate(f"nombres/{nb}", region, confidence=0.84, grayscale=True)
                         if nb in self.numbers and est_present is not None:
                             a_ajouter = int(nb[0])
                             break
                 self.add_field_all(x, y, x // 3 + y // 3 * 3, a_ajouter)
+
+    def remove_background(self, region):
+        region_no_bg = []
+        for item in region.getdata():
+            pixel = (item[0], item[1], item[2])
+            if pixel in self.blacklist_pixel:
+                region_no_bg.append((255, 255, 255, item[3]))
+            else:
+                region_no_bg.append(item)
+        region.putdata(region_no_bg)
+        return region
 
     def all_blacklist(self):
         for row in self.rows:
@@ -72,13 +86,16 @@ class Sudoku:
         i = field.i
         for item in self.rows[y].list:
             if not item.filled:
-                self.rows[y].remove(value)
+                self.rows[y].remove_white_list(value)
         for item in self.columns[x].list:
             if not item.filled:
-                self.columns[x].remove(value)
+                self.columns[x].remove_white_list(value)
         for item in self.boxs[i].dico:
             if not item.filled:
-                self.boxs[i].remove(value)
+                self.boxs[i].remove_white_list(value)
+        self.rows[y].update_field_white_list(value)
+        self.columns[x].update_field_white_list(value)
+        self.boxs[i].update_field_white_list(value)
 
     def is_empty_region(self, region):
         set_couleur = set()
@@ -136,8 +153,12 @@ class Box:
     def __str__(self):
         return f"{self.dico}"
 
-    def remove(self, nb: int):
+    def remove_white_list(self, nb: int):
         self.white_list.discard(nb)
+
+    def update_field_white_list(self, nb: int):
+        for field in self.dico:
+            field.ban_nb(nb)
 
 
 class Column:
@@ -150,8 +171,12 @@ class Column:
     def __str__(self):
         return f"{self.list}"
 
-    def remove(self, nb: int):
+    def remove_white_list(self, nb: int):
         self.white_list.discard(nb)
+
+    def update_field_white_list(self, nb: int):
+        for field in self.list:
+            field.ban_nb(nb)
 
 
 class Row:
@@ -164,8 +189,12 @@ class Row:
     def __str__(self):
         return f"{self.list}"
 
-    def remove(self, nb: int):
+    def remove_white_list(self, nb: int):
         self.white_list.discard(nb)
+
+    def update_field_white_list(self, nb: int):
+        for field in self.list:
+            field.ban_nb(nb)
 
 
 class Field:
@@ -180,6 +209,9 @@ class Field:
     def __str__(self):
         return f"{self.value if self.value is not None else self.white_list}"
 
+    def ban_nb(self, nb: int):
+        self.white_list.discard(nb)
+
     def pos(self):
         return self.x, self.y, self.i
 
@@ -189,6 +221,5 @@ sudo = Sudoku()
 print(sudo.numbers_dicto)
 sudo.show_numbers()
 print(sudo)
-
 
 print(f"{time() - debut} s")
