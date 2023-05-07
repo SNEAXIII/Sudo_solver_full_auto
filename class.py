@@ -85,6 +85,7 @@ class Sudoku:
             if field.value in selected_box.white_list:
                 selected_box.white_list.discard(field.value)
             else:
+                test = 0
                 raise ValueError(f"The field {field} already exist the box n°{selected_box.i}")
 
     def add_field_column(self, field):
@@ -163,6 +164,5 @@ class Field:
 
 sudo = Sudoku()
 
-print(sudo)
 a = 0
 a = 0
