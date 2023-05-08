@@ -40,8 +40,13 @@ class Sudoku:
                     count += 1
         return count
 
-    def select_field(self,x:int,y:int):
+    def select_field(self, x: int, y: int):
         return self.rows[y].list[x]
+
+    def fill_empty_field(self):
+        for row in self.rows:
+            for field in row.list:
+                if field.
 
     def show(self, id: int, type: str):
         if type == "box":
@@ -58,16 +63,51 @@ class Sudoku:
         for index, elem in self.numbers_dicto.items():
             print(f"Il y a {elem} fois le chiffre {index}")
 
+    def show_box(self, nb: int):
+        print(self.boxs[nb])
+
     def completeAll(self):
+        # # c'est good
+        # for row in self.rows:
+        #     for field in row.list:
+        #         if not field.filled and len(field.white_list) == 1:
+        #             value = list(field.white_list)[0]
+        #             x, y, i = field.pos()
+        #             self.add_field_all(x, y, i, value, True)
+        add_dico = set()
+        for box in self.boxs:
+            for value in box.white_list:
+                who_possible = set()
+                for field in box.dico:
+                    if not field.filled:
+                        if value in field.white_list:
+                            who_possible.add((field,value))
+                if len(who_possible) == 1:
+                    add_dico.add(list(who_possible)[0])
 
-        for row in self.rows:
-            for field in row.list:
-                if not field.filled and len(field.white_list) == 1:
-                    value = list(field.white_list)[0]
-                    x, y, i = field.pos()
-                    self.add_field_all(x, y, i, value,True)
-        a = 0
+        for field_value in add_dico:
+            value = field_value[1]
+            x, y, i = field_value[0].pos()
+            self.add_field_all(x, y, i, value, True)
 
+        # for row in self.rows:
+        #     for field in row.list:
+        #         min_row,max_row = field.i // 3,field.i // 3 + 3
+        # if row.only_field_possible(y) column.only_field_possible(x) box.only_field_possible(i)
+
+        # for box in self.boxs:
+        #     for nb in box.white_list:
+        #         checked = set()
+        #         dico = box.dico.copy()
+        #         # print(box.dico, dico)
+        #         test = 0
+        #         for field in dico:
+        #             if not field.filled and nb in field.white_list:
+        #                 checked.add(field)
+        #         if len(checked) == 1:
+        #             x, y, i = field.pos()
+        #             self.add_field_all(x, y, i, nb, True)
+        #             break
 
     def build(self):
         for y in range(9):
@@ -128,7 +168,7 @@ class Sudoku:
         left, top = x * self.longueur_case, y * self.longueur_case
         return self.screen.crop((left, top, left + self.longueur_case, top + self.longueur_case))
 
-    def add_field_all(self, x: int, y: int, i: int, value: int,blacklist:bool = False):
+    def add_field_all(self, x: int, y: int, i: int, value: int, blacklist: bool = False):
         if isinstance(value, int):
             self.numbers_dicto[str(value)] += 1
         field = Field(x, y, i, value)
@@ -140,6 +180,11 @@ class Sudoku:
 
     def add_field_box(self, field):
         selected_box = self.boxs[field.i]
+        for old_field in selected_box.dico:
+            if old_field.pos() == field.pos():
+                selected_box.dico.remove(old_field)
+                break
+
         selected_box.dico.add(field)
         if field.value is not None:
             if field.value in selected_box.white_list:
@@ -174,7 +219,10 @@ class Box:
         self.white_list = set(range(1, 10))
 
     def __str__(self):
-        return f"{self.dico}"
+        str = f"\nBox no°{self.i}\n"
+        for field in self.dico:
+            str += f"{field.pos()} {field}\n"
+        return str
 
     def remove_white_list(self, nb: int):
         self.white_list.discard(nb)
@@ -222,7 +270,7 @@ class Row:
 
 class Field:
 
-    def __init__(self, x: int, y: int, i: int, value: Optional[int] = None):
+    def __init__(self, x: int, y: int, i: int, value: Optional[int] = None,is_write: bool = False):
         self.x, self.y, self.i = x, y, i
         self.value = value
         self.filled = True if self.value is not None else False
@@ -243,13 +291,17 @@ sudo = Sudoku()
 
 print(len(sudo))
 print(sudo)
+sudo.show_box(5)
 
-print(sudo.select_field(6,2).white_list)
-sudo.completeAll()
-print(len(sudo))
-print(sudo.select_field(6,2).white_list)
+# print(sudo.select_field(8, 6))
+
+for a in range(6):
+    sudo.completeAll()
+    print(len(sudo))
+    print(sudo)
+
+# # print(sudo.select_field(6,2).white_list)
 
 a = 0
-
 
 print(f"{time() - debut} s")
