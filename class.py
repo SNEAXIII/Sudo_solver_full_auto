@@ -3,8 +3,8 @@ from time import time, sleep
 from pyautogui import locate
 from PIL import ImageGrab, Image
 import os
-import mouse
-import keyboard
+from mouse import click, move
+from keyboard import press_and_release
 
 debut = time()
 
@@ -13,6 +13,9 @@ class Sudoku:
 
     def __init__(self, png: Optional[str] = None):
         self.blacklist_pixel = ((195, 220, 250), (199, 214, 233), (228, 234, 243))
+
+        self.int_symbol = {"1": "&", "2": "é", "3": "\"", "4": "'", "5": "(", "6": "-", "7": "è", "8": "_",
+                                     "9": "ç"}
         self.numbers_dicto = {f"{nb}": 0 for nb in range(1, 10)}
         self.boxs = [Box(i) for i in range(9)]
         self.columns = [Column(x) for x in range(9)]
@@ -44,9 +47,14 @@ class Sudoku:
         return self.rows[y].list[x]
 
     def fill_empty_field(self):
+        mid_field = self.longueur_case // 2
         for row in self.rows:
             for field in row.list:
-                if field.
+                if field.is_write:
+                    move(386 + mid_field + field.x * self.longueur_case, 242 + mid_field + field.y * self.longueur_case,
+                         duration=0.001)
+                    click()
+                    press_and_release(self.int_symbol[str(field.value)])
 
     def show(self, id: int, type: str):
         if type == "box":
@@ -81,7 +89,7 @@ class Sudoku:
                 for field in box.dico:
                     if not field.filled:
                         if value in field.white_list:
-                            who_possible.add((field,value))
+                            who_possible.add((field, value))
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
 
@@ -171,7 +179,8 @@ class Sudoku:
     def add_field_all(self, x: int, y: int, i: int, value: int, blacklist: bool = False):
         if isinstance(value, int):
             self.numbers_dicto[str(value)] += 1
-        field = Field(x, y, i, value)
+
+        field = Field(x, y, i, value, blacklist)
         self.add_field_box(field)
         self.add_field_column(field)
         self.add_field_row(field)
@@ -270,11 +279,11 @@ class Row:
 
 class Field:
 
-    def __init__(self, x: int, y: int, i: int, value: Optional[int] = None,is_write: bool = False):
+    def __init__(self, x: int, y: int, i: int, value: Optional[int] = None, is_write: bool = False):
         self.x, self.y, self.i = x, y, i
         self.value = value
         self.filled = True if self.value is not None else False
-        self.is_write = True if self.value is not None else False
+        self.is_write = is_write
         self.white_list = set(range(1, 10)) if self.value is None else set()
 
     def __str__(self):
@@ -289,19 +298,14 @@ class Field:
 
 sudo = Sudoku()
 
-print(len(sudo))
 print(sudo)
-sudo.show_box(5)
 
-# print(sudo.select_field(8, 6))
-
-for a in range(6):
+old_count = 0
+while old_count != len(sudo):
+    old_count = len(sudo)
     sudo.completeAll()
     print(len(sudo))
-    print(sudo)
 
-# # print(sudo.select_field(6,2).white_list)
-
-a = 0
-
+print(sudo)
+sudo.fill_empty_field()
 print(f"{time() - debut} s")
