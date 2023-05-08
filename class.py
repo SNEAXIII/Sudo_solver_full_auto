@@ -5,6 +5,7 @@ from PIL import ImageGrab, Image
 import os
 from mouse import click, move
 from keyboard import press_and_release
+import uuid
 
 debut = time()
 
@@ -75,13 +76,13 @@ class Sudoku:
         print(self.boxs[nb])
 
     def completeAll(self):
-        # # c'est good
-        # for row in self.rows:
-        #     for field in row.list:
-        #         if not field.filled and len(field.white_list) == 1:
-        #             value = list(field.white_list)[0]
-        #             x, y, i = field.pos()
-        #             self.add_field_all(x, y, i, value, True)
+
+        for row in self.rows:
+            for field in row.list:
+                if len(field.white_list) == 1:
+                    value = list(field.white_list)[0]
+                    x, y, i = field.pos()
+                    self.add_field_all(x, y, i, value, True)
         add_dico = set()
         for box in self.boxs:
             for value in box.white_list:
@@ -123,6 +124,7 @@ class Sudoku:
                 region = self.select_region(x, y)
                 a_ajouter = None
                 if not self.is_empty_region(region):
+                    region.save(f"field/{uuid.uuid4()}.png")
                     region = self.remove_background(region.convert('RGBA'))
                     for nb in self.numbers:
                         est_present = locate(f"nombres/{nb}", region, confidence=0.84, grayscale=True)
@@ -130,6 +132,8 @@ class Sudoku:
                             a_ajouter = int(nb[0])
                             break
                 self.add_field_all(x, y, x // 3 + y // 3 * 3, a_ajouter)
+
+
 
     def remove_background(self, region):
         region_no_bg = []
