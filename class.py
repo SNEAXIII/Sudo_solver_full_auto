@@ -22,7 +22,6 @@ class Sudoku:
         self.screen = Image.open(png) if png is not None else ImageGrab.grab((386, 242, 879, 735))
         self.build()
         self.all_blacklist()
-        a = 0
 
     def __str__(self):
         str = ""
@@ -32,6 +31,17 @@ class Sudoku:
                 str += f"{field if field.value is not None else ' '}, "
             str = str[:-2] + "]\n"
         return str[:-1]
+
+    def __len__(self):
+        count = 0
+        for row in self.rows:
+            for field in row.list:
+                if field.filled:
+                    count += 1
+        return count
+
+    def select_field(self,x:int,y:int):
+        return self.rows[y].list[x]
 
     def show(self, id: int, type: str):
         if type == "box":
@@ -47,6 +57,17 @@ class Sudoku:
     def show_numbers(self):
         for index, elem in self.numbers_dicto.items():
             print(f"Il y a {elem} fois le chiffre {index}")
+
+    def completeAll(self):
+
+        for row in self.rows:
+            for field in row.list:
+                if not field.filled and len(field.white_list) == 1:
+                    value = list(field.white_list)[0]
+                    x, y, i = field.pos()
+                    self.add_field_all(x, y, i, value,True)
+        a = 0
+
 
     def build(self):
         for y in range(9):
@@ -107,13 +128,15 @@ class Sudoku:
         left, top = x * self.longueur_case, y * self.longueur_case
         return self.screen.crop((left, top, left + self.longueur_case, top + self.longueur_case))
 
-    def add_field_all(self, x: int, y: int, i: int, value: int):
+    def add_field_all(self, x: int, y: int, i: int, value: int,blacklist:bool = False):
         if isinstance(value, int):
             self.numbers_dicto[str(value)] += 1
         field = Field(x, y, i, value)
         self.add_field_box(field)
         self.add_field_column(field)
         self.add_field_row(field)
+        if blacklist:
+            self.blacklist(field)
 
     def add_field_box(self, field):
         selected_box = self.boxs[field.i]
@@ -218,8 +241,15 @@ class Field:
 
 sudo = Sudoku()
 
-print(sudo.numbers_dicto)
-sudo.show_numbers()
+print(len(sudo))
 print(sudo)
+
+print(sudo.select_field(6,2).white_list)
+sudo.completeAll()
+print(len(sudo))
+print(sudo.select_field(6,2).white_list)
+
+a = 0
+
 
 print(f"{time() - debut} s")
