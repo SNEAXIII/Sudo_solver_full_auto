@@ -5,3 +5,10 @@ si 1 qui reste --> auto fill
 autofill rows + colums + 3*3 qd nombre ajoutés
 verif si reste une possibilité case 3*3
 verif alone possible in line
+
+faire un systeme de config pour centrer l'image comme il faut
+
+penser a faire un systeme de config style:
+  config.py
+  while true
+    main.py
