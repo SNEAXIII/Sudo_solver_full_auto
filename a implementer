@@ -6,6 +6,8 @@ autofill rows + colums + 3*3 qd nombre ajoutés
 verif si reste une possibilité case 3*3
 verif alone possible in line
 
+whitelist --> {(195, 220, 250), (199, 214, 233), (255, 255, 255), (228, 234, 243)}
+
 faire un systeme de config pour centrer l'image comme il faut
 
 penser a faire un systeme de config style:
