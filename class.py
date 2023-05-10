@@ -5,7 +5,6 @@ from PIL import ImageGrab, Image
 import os
 from mouse import click, move
 from keyboard import press_and_release
-import uuid
 
 debut = time()
 
@@ -13,16 +12,15 @@ debut = time()
 class Sudoku:
 
     def __init__(self, png: Optional[str] = None):
-        self.blacklist_pixel = ((195, 220, 250), (199, 214, 233), (228, 234, 243))
-
+        self.blacklist_pixel = ((195, 220, 250), (199, 214, 233), (228, 234, 243),(255, 255, 255))
         self.int_symbol = {"1": "&", "2": "é", "3": "\"", "4": "'", "5": "(", "6": "-", "7": "è", "8": "_",
-                                     "9": "ç"}
+                           "9": "ç"}
         self.numbers_dicto = {f"{nb}": 0 for nb in range(1, 10)}
         self.boxs = [Box(i) for i in range(9)]
         self.columns = [Column(x) for x in range(9)]
         self.rows = [Row(y) for y in range(9)]
         self.longueur_case = 55
-        self.numbers = os.listdir(f"{os.path.dirname(os.path.abspath(__file__))}\\nombres")[::-1]
+        self.numbers = os.listdir(f"{os.path.dirname(os.path.abspath(__file__))}\\nombres")
         self.screen = Image.open(png) if png is not None else ImageGrab.grab((386, 242, 879, 735))
         self.build()
         self.all_blacklist()
@@ -83,6 +81,7 @@ class Sudoku:
                     value = list(field.white_list)[0]
                     x, y, i = field.pos()
                     self.add_field_all(x, y, i, value, True)
+
         add_dico = set()
         for box in self.boxs:
             for value in box.white_list:
@@ -122,18 +121,18 @@ class Sudoku:
         for y in range(9):
             for x in range(9):
                 region = self.select_region(x, y)
-                a_ajouter = None
-                if not self.is_empty_region(region):
-                    region.save(f"field/{uuid.uuid4()}.png")
-                    region = self.remove_background(region.convert('RGBA'))
-                    for nb in self.numbers:
-                        est_present = locate(f"nombres/{nb}", region, confidence=0.84, grayscale=True)
-                        if nb in self.numbers and est_present is not None:
-                            a_ajouter = int(nb[0])
-                            break
-                self.add_field_all(x, y, x // 3 + y // 3 * 3, a_ajouter)
+                self.detect_and_add_number(region, x, y)
 
-
+    def detect_and_add_number(self, region, x, y):
+        a_ajouter = None
+        if not self.is_empty_region(region):
+            region = self.remove_background(region.convert('RGBA'))
+            for nb in self.numbers:
+                est_present = locate(f"nombres/{nb}", region, confidence=0.84, grayscale=True)
+                if nb in self.numbers and est_present is not None:
+                    a_ajouter = int(nb[0])
+                    break
+        self.add_field_all(x, y, x // 3 + y // 3 * 3, a_ajouter)
 
     def remove_background(self, region):
         region_no_bg = []
@@ -142,7 +141,7 @@ class Sudoku:
             if pixel in self.blacklist_pixel:
                 region_no_bg.append((255, 255, 255, item[3]))
             else:
-                region_no_bg.append(item)
+                region_no_bg.append((0, 0, 0, item[3]))
         region.putdata(region_no_bg)
         return region
 
@@ -153,10 +152,7 @@ class Sudoku:
                     self.blacklist(field)
 
     def blacklist(self, field):
-        value = field.value
-        y = field.y
-        x = field.x
-        i = field.i
+        y, x, i, value = field.y, field.x, field.i, field.value
         for item in self.rows[y].list:
             if not item.filled:
                 self.rows[y].remove_white_list(value)
