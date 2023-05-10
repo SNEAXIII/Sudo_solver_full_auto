@@ -37,6 +37,7 @@ for y in range(9):
         # pixels[i] = 255, 0, 0
         # pixels[i2] = 255, 0, 0
         number = screen.crop((x2, y2, x3, y3))
+        number.save(f"bulked/{x,y}.png")
         if y == 0:
             number.save(f"test_position/{x}.png")
         number_pixel = list(number.getdata())

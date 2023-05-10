@@ -9,6 +9,8 @@ for /l %%i in (1,1,9) do (
 )
 mkdir empty
 cd ../
+rmdir /s /q bulked
+mkdir bulked
 py decoupage_pixel.py
 pause
     goto debut
