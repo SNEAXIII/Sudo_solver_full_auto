@@ -19,6 +19,7 @@ black_list = {(195, 220, 250), (199, 214, 233), (255, 255, 255), (228, 234, 243)
 
 _1 = ((8, 8), (15, 4), (15, 11), (15, 18), (15, 27))
 _2 = ((6,9),(13,4),(20,9),(19,15),(12,23),(7,29),(14,29),(20,29))
+_3 = ((6,8),(13,4),(18,6),(20,10),(16,16),(11,16),(21,23),(13,29),(6,25))
 _4 = ((8, 23), (10, 13), (18, 4), (18, 16), (18, 28), (22, 22))
 _7 = ((6, 4), (21, 4), (18, 13), (15, 19), (10, 29))
 
@@ -43,7 +44,7 @@ for y in range(9):
         #     number.save(f"test_position/{x}.png")
         number_pixel = list(number.getdata())
         valid = True
-        for pixel in _2:
+        for pixel in _3:
             posi = pos(pixel)
             if number_pixel[posi] in black_list:
                 valid = False
@@ -54,11 +55,11 @@ for y in range(9):
         if valid:
             count += 1
             print(x)
-            new_number.save(f"test_position/2/testerpixel{x, y}.png")
+            new_number.save(f"test_position/3/testerpixel{x, y}.png")
         else:
             new_number.save(f"test_position/empty/testerpixel{x, y}.png")
 
-print(f"il y a {count} numéro 2")
+print(f"il y a {count} numéro 3")
 
 new_img = Image.new(screen.mode, screen.size)
 new_img.putdata(pixels)
