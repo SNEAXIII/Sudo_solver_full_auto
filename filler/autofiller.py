@@ -2,6 +2,7 @@ from time import sleep
 import keyboard
 import pyautogui
 
+
 def clicked():
     global nb
     global side
@@ -10,11 +11,10 @@ def clicked():
     keyboard.press_and_release(enter)
     keyboard.press_and_release(enter)
 
+
 nb = {"1": "&", "2": "é", "3": "\"", "4": "'", "5": "(", "6": "-", "7": "è", "8": "_", "9": "ç"}[input("nb : ")]
 enter = "enter"
 keyboard.press_and_release("alt+tab")
-
-
 
 for row in range(9):
     side = "right" if row % 2 == 0 else "left"

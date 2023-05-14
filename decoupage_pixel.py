@@ -47,8 +47,6 @@ for y in range(9):
         # if y == 0:
         #     number.save(f"test_position/{x}.png")
         for index_number_list, number_list in enumerate(numbers_list):
-            if number_list == _8:
-                test = 0
             index_max = len(number_list[0]) - number_list[1]
             number_pixel = list(number.getdata())
             valid = True
