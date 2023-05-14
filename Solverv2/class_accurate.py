@@ -98,10 +98,32 @@ class Sudoku:
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
 
+        for box in self.rows:
+            for value in box.white_list:
+                who_possible = set()
+                for field in box.list:
+                    if not field.filled:
+                        if value in field.white_list:
+                            who_possible.add((field, value))
+                if len(who_possible) == 1:
+                    add_dico.add(list(who_possible)[0])
+
+        for box in self.columns:
+            for value in box.white_list:
+                who_possible = set()
+                for field in box.list:
+                    if not field.filled:
+                        if value in field.white_list:
+                            who_possible.add((field, value))
+                if len(who_possible) == 1:
+                    add_dico.add(list(who_possible)[0])
+
         for field_value in add_dico:
             value = field_value[1]
             x, y, i = field_value[0].pos()
             self.add_field_all(x, y, i, value, True)
+
+
 
         # for row in self.rows:
         #     for field in row.list:
@@ -305,7 +327,7 @@ class Field:
 sudo = Sudoku()
 
 print(sudo)
-
+print(f"{time() - debut} s")
 old_count = 0
 while old_count != len(sudo):
     old_count = len(sudo)
