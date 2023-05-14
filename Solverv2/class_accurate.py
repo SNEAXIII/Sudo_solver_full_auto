@@ -325,15 +325,15 @@ class Field:
 
 
 sudo = Sudoku()
-
+debut = time()
 print(sudo)
-print(f"{time() - debut} s")
+# print(f"{time() - debut} s")
 old_count = 0
 while old_count != len(sudo):
     old_count = len(sudo)
     sudo.completeAll()
-    print(len(sudo))
-
-print(sudo)
-sudo.fill_empty_field()
+    # print(len(sudo))
 print(f"{time() - debut} s")
+# print(sudo)
+# sudo.fill_empty_field()
+
