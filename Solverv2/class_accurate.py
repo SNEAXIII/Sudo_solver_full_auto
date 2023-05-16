@@ -60,6 +60,35 @@ class Sudoku:
                     click()
                     press_and_release(self.int_symbol[str(field.value)])
 
+    def fill_note(self):
+        x1,y = 1116,271
+        move(x1,y)
+        click()
+        mid_field = self.longueur_case // 2
+        for row in self.rows:
+            for field in row.list:
+                if not field.is_write:
+                    move(386 + mid_field + field.x * self.longueur_case, 242 + mid_field + field.y * self.longueur_case,
+                         duration=0.001)
+                    click()
+                    for nb in field.white_list:
+                        press_and_release(self.int_symbol[str(nb)])
+        move(x1,y)
+        click()
+
+    def clear_note(self):
+        x1,y = 1025,271
+        mid_field = self.longueur_case // 2
+        for row in self.rows:
+            for field in row.list:
+                if not field.filled:
+                    move(386 + mid_field + field.x * self.longueur_case, 242 + mid_field + field.y * self.longueur_case,
+                         duration=0.001)
+                    click()
+                    move(x1, y)
+                    click()
+
+
     def show(self, id: int, type: str):
         if type == "box":
             for index, item in enumerate(self.boxs[id].dico):
@@ -123,26 +152,6 @@ class Sudoku:
             x, y, i = field_value[0].pos()
             self.add_field_all(x, y, i, value, True)
 
-
-
-        # for row in self.rows:
-        #     for field in row.list:
-        #         min_row,max_row = field.i // 3,field.i // 3 + 3
-        # if row.only_field_possible(y) column.only_field_possible(x) box.only_field_possible(i)
-
-        # for box in self.boxs:
-        #     for nb in box.white_list:
-        #         checked = set()
-        #         dico = box.dico.copy()
-        #         # print(box.dico, dico)
-        #         test = 0
-        #         for field in dico:
-        #             if not field.filled and nb in field.white_list:
-        #                 checked.add(field)
-        #         if len(checked) == 1:
-        #             x, y, i = field.pos()
-        #             self.add_field_all(x, y, i, nb, True)
-        #             break
 
     def build(self):
         for y in range(9):
@@ -326,14 +335,17 @@ class Field:
 
 sudo = Sudoku()
 debut = time()
-print(sudo)
+print(sudo,"\n____________________________")
 # print(f"{time() - debut} s")
 old_count = 0
 while old_count != len(sudo):
     old_count = len(sudo)
     sudo.completeAll()
     # print(len(sudo))
-print(f"{time() - debut} s")
-# print(sudo)
-# sudo.fill_empty_field()
 
+print(sudo)
+print(f"{time() - debut} s")
+sudo.clear_note()
+sudo.fill_empty_field()
+sudo.fill_note()
+print(f"{time() - debut} s")
