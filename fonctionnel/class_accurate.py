@@ -60,9 +60,9 @@ class Sudoku:
                     click()
                     press_and_release(self.int_symbol[str(field.value)])
 
-    def fill_note(self):
-        x1,y = 1116,271
-        move(x1,y)
+    def fill_note(self, listed=[]):
+        x1, y = 1116, 271
+        move(x1, y)
         click()
         mid_field = self.longueur_case // 2
         for row in self.rows:
@@ -72,12 +72,13 @@ class Sudoku:
                          duration=0.001)
                     click()
                     for nb in field.white_list:
-                        press_and_release(self.int_symbol[str(nb)])
-        move(x1,y)
+                        if nb in listed or listed == []:
+                            press_and_release(self.int_symbol[str(nb)])
+        move(x1, y)
         click()
 
     def clear_note(self):
-        x1,y = 1025,271
+        x1, y = 1025, 271
         mid_field = self.longueur_case // 2
         for row in self.rows:
             for field in row.list:
@@ -87,7 +88,6 @@ class Sudoku:
                     click()
                     move(x1, y)
                     click()
-
 
     def show(self, id: int, type: str):
         if type == "box":
@@ -108,7 +108,7 @@ class Sudoku:
         print(self.boxs[nb])
 
     def completeAll(self):
-
+        # ajouter les cases qui ont qu'une seule valeur possible
         for row in self.rows:
             for field in row.list:
                 if len(field.white_list) == 1:
@@ -116,6 +116,7 @@ class Sudoku:
                     x, y, i = field.pos()
                     self.add_field_all(x, y, i, value, True)
 
+        # placer les cases par déduction dans les boites quand il reste une seule case pour un nombre donné
         add_dico = set()
         for box in self.boxs:
             for value in box.white_list:
@@ -126,7 +127,9 @@ class Sudoku:
                             who_possible.add((field, value))
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
-
+        self.add_dico(add_dico)
+        # placer les cases par déduction dans les lignes quand il reste une seule case pour un nombre donné
+        add_dico = set()
         for box in self.rows:
             for value in box.white_list:
                 who_possible = set()
@@ -136,7 +139,9 @@ class Sudoku:
                             who_possible.add((field, value))
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
-
+        self.add_dico(add_dico)
+        # placer les cases par déduction dans les collones quand il reste une seule case pour un nombre donné
+        add_dico = set()
         for box in self.columns:
             for value in box.white_list:
                 who_possible = set()
@@ -146,12 +151,14 @@ class Sudoku:
                             who_possible.add((field, value))
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
+        self.add_dico(add_dico)
+
+    def add_dico(self, add_dico):
 
         for field_value in add_dico:
             value = field_value[1]
             x, y, i = field_value[0].pos()
             self.add_field_all(x, y, i, value, True)
-
 
     def build(self):
         for y in range(9):
@@ -335,7 +342,7 @@ class Field:
 
 sudo = Sudoku()
 debut = time()
-print(sudo,"\n____________________________")
+print(sudo, "\n____________________________")
 # print(f"{time() - debut} s")
 old_count = 0
 while old_count != len(sudo):
@@ -347,5 +354,5 @@ print(sudo)
 print(f"{time() - debut} s")
 sudo.clear_note()
 sudo.fill_empty_field()
-sudo.fill_note()
+sudo.fill_note([])
 print(f"{time() - debut} s")
