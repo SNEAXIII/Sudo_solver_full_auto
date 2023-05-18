@@ -47,6 +47,12 @@ class Sudoku:
                     count += 1
         return count
 
+    def solve(self):
+        old_count = 0
+        while old_count != len(self):
+            old_count = len(self)
+            self.completeAll()
+
     def select_field(self, x: int, y: int):
         return self.rows[y].list[x]
 
@@ -108,6 +114,7 @@ class Sudoku:
         print(self.boxs[nb])
 
     def completeAll(self):
+
         # ajouter les cases qui ont qu'une seule valeur possible
         for row in self.rows:
             for field in row.list:
@@ -128,6 +135,7 @@ class Sudoku:
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
         self.add_dico(add_dico)
+
         # placer les cases par déduction dans les lignes quand il reste une seule case pour un nombre donné
         add_dico = set()
         for box in self.rows:
@@ -140,7 +148,8 @@ class Sudoku:
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
         self.add_dico(add_dico)
-        # placer les cases par déduction dans les collones quand il reste une seule case pour un nombre donné
+
+        # placer les cases par déduction dans les colones quand il reste une seule case pour un nombre donné
         add_dico = set()
         for box in self.columns:
             for value in box.white_list:
@@ -342,15 +351,12 @@ class Field:
 
 sudo = Sudoku()
 debut = time()
+sudo.solve()
+print(sudo)
 print(sudo, "\n____________________________")
 # print(f"{time() - debut} s")
-old_count = 0
-while old_count != len(sudo):
-    old_count = len(sudo)
-    sudo.completeAll()
-    # print(len(sudo))
 
-print(sudo)
+
 print(f"{time() - debut} s")
 sudo.clear_note()
 sudo.fill_empty_field()
