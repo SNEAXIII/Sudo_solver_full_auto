@@ -70,17 +70,17 @@ class Sudoku:
     def solve(self):
         old_count = 0
         while old_count != len(self):
-            _len = len(self)
-            old_count = _len
+            print(0)
+            old_count = len(self)
             self.completeAll()
-            # if old_count == _len:
-            #     print("______________")
-            #     print(_len)
-            #     print("______________")
-            #     self.assoc_pairs()
-            #     self.completeAll()
-            #     print(_len)
-            #     self.reset_withlist()
+            _len =len(self)
+            if old_count == _len and not _len == 81:
+                print("avant",len(self))
+                print(1)
+                self.assoc_pairs()
+                self.completeAll()
+                print("apres",len(self))
+                # self.reset_withlist()
 
     def reset_withlist(self):
         for elem in self.boxs:
