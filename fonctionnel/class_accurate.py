@@ -89,7 +89,7 @@ class Sudoku:
                     for i, count in enumerate(result):
                         id = column.x // 3 + i * 3
                         current_box = self.boxs[id]
-                        if current_box.count_number(nb) == count == 2:
+                        if current_box.count_number(nb) == count in (2,3):
                             for field in column.list:
                                 if not field.i == id and nb in field.white_list:
                                     field.ban_nb(nb)
@@ -103,7 +103,7 @@ class Sudoku:
                     for i, count in enumerate(result):
                         id = row.y // 3 * 3 + i
                         current_box = self.boxs[id]
-                        if current_box.count_number(nb) == count == 2:
+                        if current_box.count_number(nb) == count in (2,3):
                             for field in row.list:
                                 if not field.i == id and nb in field.white_list:
                                     field.ban_nb(nb)
