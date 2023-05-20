@@ -8,25 +8,32 @@ from numers_list import numbers_list
 debut = time()
 
 
+class Field:
+
+    def __init__(self, x: int, y: int, i: int, value: Optional[int] = None, is_write: bool = False):
+        self.x, self.y, self.i = x, y, i
+        self.value = value
+        self.filled = True if self.value is not None else False
+        self.is_write = is_write
+        self.reset_white_list()
+
+
+    def __str__(self):
+        return f"{self.value if self.value is not None else self.white_list}"
+
+    def ban_nb(self, nb: int):
+        self.white_list.discard(nb)
+
+    def pos(self):
+        return self.x, self.y, self.i
+
+    def reset_white_list(self):
+        self.white_list = set(range(1, 10)) if self.value is None else set()
+
 class Sudoku:
 
     def __init__(self):
-        self.blacklist_pixel = ((195, 220, 250), (199, 214, 233), (255, 255, 255), (228, 234, 243), (240, 208, 214))
-        self.int_symbol = {"1": "&", "2": "é", "3": "\"", "4": "'", "5": "(", "6": "-", "7": "è", "8": "_",
-                           "9": "ç"}
-        self.numbers_dicto_filled = {f"{nb}": 0 for nb in range(1, 10)}
-        self.numbers_pos = numbers_list
-        self.boxs = [Box(i) for i in range(9)]
-        self.columns = [Column(x) for x in range(9)]
-        self.rows = [Row(y) for y in range(9)]
-        self.x_base = 12
-        self.y_base = 9
-        self.y_moins = 33
-        self.x_plus = 27
-        self.longueur_case = 55
-        self.dico_pos = {0: 0, 1: 55, 2: 110, 3: 165, 4: 220, 5: 275, 6: 331, 7: 385, 8: 440}
-        self.screen = ImageGrab.grab((386, 242, 879, 735))
-        self.screen_pixel = self.screen.getdata()
+        self.def_attributes()
         self.build()
         self.all_blacklist()
 
@@ -47,13 +54,49 @@ class Sudoku:
                     count += 1
         return count
 
+    def def_attributes(self):
+        self.screen = ImageGrab.grab((386, 242, 879, 735))
+        self.blacklist_pixel = ((195, 220, 250), (199, 214, 233), (255, 255, 255), (228, 234, 243), (240, 208, 214))
+        self.int_symbol = {"1": "&", "2": "é", "3": "\"", "4": "'", "5": "(", "6": "-", "7": "è", "8": "_", "9": "ç"}
+        self.numbers_dicto_filled = {f"{nb}": 0 for nb in range(1, 10)}
+        self.numbers_pos = numbers_list
+        self.x_base = 12
+        self.y_base = 9
+        self.y_moins = 33
+        self.x_plus = 27
+        self.longueur_case = 55
+        self.dico_pos = {0: 0, 1: 55, 2: 110, 3: 165, 4: 220, 5: 275, 6: 331, 7: 385, 8: 440}
+
     def solve(self):
         old_count = 0
         while old_count != len(self):
-            old_count = len(self)
+            _len = len(self)
+            old_count = _len
             self.completeAll()
+            # if old_count == _len:
+            #     print("______________")
+            #     print(_len)
+            #     print("______________")
+            #     self.assoc_pairs()
+            #     self.completeAll()
+            #     print(_len)
+            #     self.reset_withlist()
 
-    def select_field(self, x: int, y: int):
+    def reset_withlist(self):
+        for elem in self.boxs:
+            elem.reset_white_list()
+        for elem in self.columns:
+            elem.reset_white_list()
+        for elem in self.rows:
+            elem.reset_white_list()
+
+        for row in self.rows:
+            for field in row.list:
+                if not field.filled:
+                    field.reset_white_list()
+        self.all_blacklist()
+
+    def select_field(self, x: int, y: int) -> Field:
         return self.rows[y].list[x]
 
     def fill_empty_field(self):
@@ -68,8 +111,9 @@ class Sudoku:
 
     def fill_note(self, listed=[]):
         x1, y = 1116, 271
-        move(x1, y)
-        click()
+        if ImageGrab.grab((1141, 237, 1141 + 1, 237 + 1)).getpixel((0, 0)) != (61, 108, 223):
+            move(x1, y)
+            click()
         mid_field = self.longueur_case // 2
         for row in self.rows:
             for field in row.list:
@@ -84,7 +128,6 @@ class Sudoku:
         click()
 
     def clear_note(self):
-        x1, y = 1025, 271
         mid_field = self.longueur_case // 2
         for row in self.rows:
             for field in row.list:
@@ -92,8 +135,7 @@ class Sudoku:
                     move(386 + mid_field + field.x * self.longueur_case, 242 + mid_field + field.y * self.longueur_case,
                          duration=0.001)
                     click()
-                    move(x1, y)
-                    click()
+                    press_and_release("suppr")
 
     def show(self, id: int, type: str):
         if type == "box":
@@ -123,8 +165,10 @@ class Sudoku:
                     x, y, i = field.pos()
                     self.add_field_all(x, y, i, value, True)
 
-        # placer les cases par déduction dans les boites quand il reste une seule case pour un nombre donné
+        # éléments à placer
         add_dico = set()
+
+        # placer les cases par déduction dans les boites quand il reste une seule case pour un nombre donné
         for box in self.boxs:
             for value in box.white_list:
                 who_possible = set()
@@ -134,10 +178,9 @@ class Sudoku:
                             who_possible.add((field, value))
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
-        self.add_dico(add_dico)
 
         # placer les cases par déduction dans les lignes quand il reste une seule case pour un nombre donné
-        add_dico = set()
+
         for box in self.rows:
             for value in box.white_list:
                 who_possible = set()
@@ -147,10 +190,9 @@ class Sudoku:
                             who_possible.add((field, value))
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
-        self.add_dico(add_dico)
 
         # placer les cases par déduction dans les colones quand il reste une seule case pour un nombre donné
-        add_dico = set()
+
         for box in self.columns:
             for value in box.white_list:
                 who_possible = set()
@@ -160,7 +202,47 @@ class Sudoku:
                             who_possible.add((field, value))
                 if len(who_possible) == 1:
                     add_dico.add(list(who_possible)[0])
-        self.add_dico(add_dico)
+
+        if len(add_dico) != 0:
+            self.add_dico(add_dico)
+
+    def assoc_pairs(self):
+        # On récupère toutes les cases pouvant prendre la valeur nb et on les organise dans l'ordre
+        numbers_possible = [[] for _ in range(9)]
+        for row in self.rows:
+            for field in row.list:
+                if not field.filled:
+                    for nb in field.white_list:
+                        numbers_possible[nb - 1].append(field)
+
+        # On applique la méthode des paires associées
+        for index, number_list in enumerate(numbers_possible):
+            number = index + 1
+            x_blacklist = set()
+            y_blacklist = set()
+            numbers_white_list = set()
+            numbers_black_list = set()
+            for field in number_list:
+                if not field in numbers_black_list:
+                    add_to_whitelist = True
+                    ban_x, ban_y = field.x, field.y
+                    for field2 in number_list:
+                        if not field2.x == ban_x and not field2.y == ban_y:
+                            y_field = self.select_field(field.x, field2.y)
+                            x_field = self.select_field(field2.x, field.y)
+                            if not y_field.filled and not x_field.filled:
+                                numbers_black_list.update({field, field2, x_field, y_field})
+                                x_blacklist.update({field.x, field2.x})
+                                y_blacklist.update({field.y, field2.y})
+                                add_to_whitelist = False
+                                break
+                    if add_to_whitelist:
+                        numbers_white_list.add(field)
+            # On retire des notes ce qui est blacklist
+
+            for field in numbers_white_list:
+                if field.x in x_blacklist or field.y in y_blacklist:
+                    field.ban_nb(number)
 
     def add_dico(self, add_dico):
 
@@ -170,6 +252,12 @@ class Sudoku:
             self.add_field_all(x, y, i, value, True)
 
     def build(self):
+
+        # self.screen_pixel = self.screen.getdata()
+        self.boxs = [Box(i) for i in range(9)]
+        self.columns = [Column(x) for x in range(9)]
+        self.rows = [Row(y) for y in range(9)]
+
         for y in range(9):
             for x in range(9):
                 region = self.select_region(x, y)
@@ -278,7 +366,7 @@ class Box:
     def __init__(self, i: int):
         self.i = i
         self.dico = set()
-        self.white_list = set(range(1, 10))
+        self.reset_white_list()
 
     def __str__(self):
         str = f"\nBox no°{self.i}\n"
@@ -293,13 +381,16 @@ class Box:
         for field in self.dico:
             field.ban_nb(nb)
 
+    def reset_white_list(self):
+        self.white_list = set(range(1, 10))
+
 
 class Column:
 
     def __init__(self, x: int):
         self.x = x
         self.list = [None] * 9
-        self.white_list = set(range(1, 10))
+        self.reset_white_list()
 
     def __str__(self):
         return f"{self.list}"
@@ -310,6 +401,9 @@ class Column:
     def update_field_white_list(self, nb: int):
         for field in self.list:
             field.ban_nb(nb)
+
+    def reset_white_list(self):
+        self.white_list = set(range(1, 10))
 
 
 class Row:
@@ -317,7 +411,7 @@ class Row:
     def __init__(self, y: int):
         self.y = y
         self.list = [None] * 9
-        self.white_list = set(range(1, 10))
+        self.reset_white_list()
 
     def __str__(self):
         return f"{self.list}"
@@ -329,36 +423,23 @@ class Row:
         for field in self.list:
             field.ban_nb(nb)
 
+    def reset_white_list(self):
+        self.white_list = set(range(1, 10))
 
-class Field:
 
-    def __init__(self, x: int, y: int, i: int, value: Optional[int] = None, is_write: bool = False):
-        self.x, self.y, self.i = x, y, i
-        self.value = value
-        self.filled = True if self.value is not None else False
-        self.is_write = is_write
-        self.white_list = set(range(1, 10)) if self.value is None else set()
-
-    def __str__(self):
-        return f"{self.value if self.value is not None else self.white_list}"
-
-    def ban_nb(self, nb: int):
-        self.white_list.discard(nb)
-
-    def pos(self):
-        return self.x, self.y, self.i
-
+# récuperation du sudoku et enregistrement sous forme d'objet
+debut = time()
 
 sudo = Sudoku()
-debut = time()
-sudo.solve()
-print(sudo)
-print(sudo, "\n____________________________")
+
 # print(f"{time() - debut} s")
 
-
-print(f"{time() - debut} s")
 sudo.clear_note()
+
+sudo.solve()
+
 sudo.fill_empty_field()
+
 sudo.fill_note([])
+
 print(f"{time() - debut} s")
