@@ -73,28 +73,41 @@ class Sudoku:
             old_count = len(self)
             self.completeAll()
             _len = len(self)
-            # if old_count == _len and not _len == 81:
-            #     print("avant",len(self))
-            #     print(1)
-            #     self.assoc_pairs()
-            #     self.completeAll()
-            #     print("apres",len(self))
-            #     self.reset_withlist()
+            if old_count == _len and not _len == 81:
+                print("avant aide :", len(self))
+                self.pointing_pairs()
+                self.completeAll()
+                print("avant aide :", len(self))
 
     def pointing_pairs(self):
+
+        # On regarde les paires pointantes dans les colones
         for column in self.columns:
             if 3 <= len(column.white_list):
-                # print(f"-----{column.x}")
                 for nb in column.white_list:
                     result = column.count_number(nb)
                     for i, count in enumerate(result):
                         id = column.x // 3 + i * 3
                         current_box = self.boxs[id]
-                        if current_box.count_number(nb) == count and count in (2, 3):
+                        if current_box.count_number(nb) == count == 2:
                             for field in column.list:
-                                if not field.i == id:
+                                if not field.i == id and nb in field.white_list:
                                     field.ban_nb(nb)
-                                    # print(field.pos(), nb)
+                                    print(f"J'ai blacklist {nb} a la position {field.pos()} avec la colone")
+
+        # On regarde les paires pointantes dans les lignes
+        for row in self.rows:
+            if 3 <= len(row.white_list):
+                for nb in row.white_list:
+                    result = row.count_number(nb)
+                    for i, count in enumerate(result):
+                        id = row.y // 3 * 3 + i
+                        current_box = self.boxs[id]
+                        if current_box.count_number(nb) == count == 2:
+                            for field in row.list:
+                                if not field.i == id and nb in field.white_list:
+                                    field.ban_nb(nb)
+                                    print(f"J'ai blacklist {nb} a la position {field.pos()} avec la ligne")
 
     def reset_withlist(self):
         for elem in self.boxs:
@@ -478,9 +491,6 @@ debut = time()
 sudo.solve()
 print(f"{time() - debut} s")
 
-
-sudo.pointing_pairs()
-sudo.solve()
 
 sudo.fill_empty_field()
 sudo.fill_note([])
