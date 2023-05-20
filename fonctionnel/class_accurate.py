@@ -17,7 +17,6 @@ class Field:
         self.is_write = is_write
         self.reset_white_list()
 
-
     def __str__(self):
         return f"{self.value if self.value is not None else self.white_list}"
 
@@ -29,6 +28,7 @@ class Field:
 
     def reset_white_list(self):
         self.white_list = set(range(1, 10)) if self.value is None else set()
+
 
 class Sudoku:
 
@@ -70,17 +70,31 @@ class Sudoku:
     def solve(self):
         old_count = 0
         while old_count != len(self):
-            print(0)
             old_count = len(self)
             self.completeAll()
-            _len =len(self)
-            if old_count == _len and not _len == 81:
-                print("avant",len(self))
-                print(1)
-                self.assoc_pairs()
-                self.completeAll()
-                print("apres",len(self))
-                # self.reset_withlist()
+            _len = len(self)
+            # if old_count == _len and not _len == 81:
+            #     print("avant",len(self))
+            #     print(1)
+            #     self.assoc_pairs()
+            #     self.completeAll()
+            #     print("apres",len(self))
+            #     self.reset_withlist()
+
+    def pointing_pairs(self):
+        for column in self.columns:
+            if 3 <= len(column.white_list):
+                # print(f"-----{column.x}")
+                for nb in column.white_list:
+                    result = column.count_number(nb)
+                    for i, count in enumerate(result):
+                        id = column.x // 3 + i * 3
+                        current_box = self.boxs[id]
+                        if current_box.count_number(nb) == count and count in (2, 3):
+                            for field in column.list:
+                                if not field.i == id:
+                                    field.ban_nb(nb)
+                                    # print(field.pos(), nb)
 
     def reset_withlist(self):
         for elem in self.boxs:
@@ -384,6 +398,15 @@ class Box:
     def reset_white_list(self):
         self.white_list = set(range(1, 10))
 
+    def count_number(self, nb: int):
+        if not nb in self.white_list:
+            return 0
+        count = 0
+        for field in self.dico:
+            if not field.filled and nb in field.white_list:
+                count += 1
+        return count
+
 
 class Column:
 
@@ -404,6 +427,15 @@ class Column:
 
     def reset_white_list(self):
         self.white_list = set(range(1, 10))
+
+    def count_number(self, nb: int):
+        count = [0, 0, 0]
+        if not nb in self.white_list:
+            return count
+        for field in self.list:
+            if not field.filled and nb in field.white_list:
+                count[field.y // 3] += 1
+        return count
 
 
 class Row:
@@ -426,20 +458,38 @@ class Row:
     def reset_white_list(self):
         self.white_list = set(range(1, 10))
 
+    def count_number(self, nb: int):
+        count = [0, 0, 0]
+        if not nb in self.white_list:
+            return count
+        for field in self.list:
+            if not field.filled and nb in field.white_list:
+                count[field.x // 3] += 1
+        return count
+
 
 # récuperation du sudoku et enregistrement sous forme d'objet
-debut = time()
+
 
 sudo = Sudoku()
 
-# print(f"{time() - debut} s")
-
 sudo.clear_note()
+debut = time()
+sudo.solve()
+print(f"{time() - debut} s")
 
+
+sudo.pointing_pairs()
 sudo.solve()
 
 sudo.fill_empty_field()
-
 sudo.fill_note([])
 
-print(f"{time() - debut} s")
+# for box in sudo.boxs:
+#     dico = {nb: 0 for nb in box.white_list}
+#     for field in box.dico:
+#         for value in field.white_list:
+#             dico[value] += 1
+#     for key, value in dico.items():
+#         if value == 2:
+#             print(box.i, key)
