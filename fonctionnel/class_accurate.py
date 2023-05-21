@@ -74,10 +74,10 @@ class Sudoku:
             self.completeAll()
             _len = len(self)
             if old_count == _len and not _len == 81:
-                print("avant aide :", len(self))
+                print("avant paires :", len(self))
                 self.pointing_pairs()
                 self.completeAll()
-                print("avant aide :", len(self))
+                print("apres paires :", len(self))
 
     def pointing_pairs(self):
 
