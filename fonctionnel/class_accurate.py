@@ -495,11 +495,4 @@ print(f"{time() - debut} s")
 sudo.fill_empty_field()
 sudo.fill_note([])
 
-# for box in sudo.boxs:
-#     dico = {nb: 0 for nb in box.white_list}
-#     for field in box.dico:
-#         for value in field.white_list:
-#             dico[value] += 1
-#     for key, value in dico.items():
-#         if value == 2:
-#             print(box.i, key)
+
