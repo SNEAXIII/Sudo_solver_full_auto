@@ -25,7 +25,8 @@ class Sudoku:
         self.x_plus = 27
         self.longueur_case = 55
         self.dico_pos = {0: 0, 1: 55, 2: 110, 3: 165, 4: 220, 5: 275, 6: 331, 7: 385, 8: 440}
-        self.screen = ImageGrab.grab((365, 244, 858, 737))
+        self.screen = ImageGrab.grab((365, 244+12, 858, 737+12))
+        # self.screen.show()
         self.screen_pixel = self.screen.getdata()
         self.build()
         self.all_blacklist()

@@ -55,7 +55,7 @@ class Sudoku:
         return count
 
     def def_attributes(self):
-        self.screen = ImageGrab.grab((386, 242, 879, 735))
+        self.screen = ImageGrab.grab((386, 242+12, 879, 735+12))
         self.blacklist_pixel = ((195, 220, 250), (199, 214, 233), (255, 255, 255), (228, 234, 243), (240, 208, 214))
         self.int_symbol = {"1": "&", "2": "é", "3": "\"", "4": "'", "5": "(", "6": "-", "7": "è", "8": "_", "9": "ç"}
         self.numbers_dicto_filled = {f"{nb}": 0 for nb in range(1, 10)}
